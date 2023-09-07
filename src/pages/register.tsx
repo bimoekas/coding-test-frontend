@@ -13,7 +13,7 @@ interface RegisterFormValues {
     name?: string[]
     email?: string[]
     password?: string[]
-    photo?: File
+    photo?: File | null
     password_confirmation?: string[]
     length?: number
 }
@@ -184,7 +184,7 @@ const Register = () => {
                                 Photo
                             </Label>
 
-                            <div className="flex justify-center">
+                            <div className="flex flex-col items-center justify-center">
                                 <Label
                                     htmlFor="file-upload"
                                     className="cursor-pointer">
