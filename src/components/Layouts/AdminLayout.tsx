@@ -1,19 +1,35 @@
 'use client'
 
-import { FC, PropsWithChildren } from 'react'
+import { PropsWithChildren, ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import Image from 'next/image'
 
-import { WrenchIcon, GaugeCircleIcon, UsersIcon } from 'lucide-react'
+import { WrenchIcon, GaugeCircleIcon, UsersIcon, BellIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
 
 import { Label } from '@/components/ui/label'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+} from '../ui/dropdown-menu'
+import { DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu'
+import { useAuth } from '@/hooks/auth'
 
-export const AdminLayout: FC<PropsWithChildren> = ({ children }) => {
+interface LayoutProps {
+    routeLocation: ReactNode
+}
+
+export const AdminLayout = ({
+    children,
+    routeLocation,
+}: PropsWithChildren<LayoutProps>) => {
     const router = useRouter()
+    const { logout } = useAuth({ middleware: 'auth' })
 
     const navigation = [
         {
@@ -86,7 +102,46 @@ export const AdminLayout: FC<PropsWithChildren> = ({ children }) => {
             </div>
 
             <div className="xl:pl-72 ">
+                <header>
+                    <div dir="rtl">
+                        <div className="relative h-20 w-[98%] my-8 bg-white rounded-l-full">
+                            <div
+                                className="h-full w-full flex text-center items-center justify-between px-8"
+                                dir="ltr">
+                                <nav className="flex" aria-label="Breadcrumb">
+                                    <ol className="inline-flex items-center space-x-1 md:space-x-3">
+                                        <li className="inline-flex items-center">
+                                            {routeLocation}
+                                        </li>
+                                    </ol>
+                                </nav>
+                                <div className="flex items-center">
+                                    <BellIcon />{' '}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger>
+                                            <Avatar className="ml-4">
+                                                <AvatarImage
+                                                    src="https://github.com/shadcn.png"
+                                                    alt="@shadcn"
+                                                />
+                                                <AvatarFallback>
+                                                    CN
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="bg-white">
+                                            <DropdownMenuItem onClick={logout}>
+                                                Logout
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
                 <main>{children}</main>
+
                 <Toaster />
             </div>
         </div>
