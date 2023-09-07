@@ -1,16 +1,19 @@
 import AuthCard from '@/components/AuthCard'
 import AuthSessionStatus from '@/components/AuthSessionStatus'
 import GuestLayout from '@/components/Layouts/GuestLayout'
-import Input from '@/components/Input'
-import InputError from '@/components/InputError'
-import Label from '@/components/Label'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/auth'
-import { useEffect, useState, FormEventHandler } from 'react'
-import { useRouter } from 'next/router'
+import { useState, FormEventHandler, useEffect } from 'react'
 import Head from 'next/head'
 import Checkbox from '@/components/Checkbox'
 import PrimaryButton from '@/components/PrimaryButton'
+import Image from 'next/image'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { ArrowRightIcon } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import InputError from '@/components/InputError'
+import { useRouter } from 'next/router'
 
 interface LoginFormValues {
     email?: string[]
@@ -54,83 +57,90 @@ const Login = () => {
     }
 
     return (
-        <GuestLayout>
-            <Head>
-                <title>Laravel - Login</title>
-            </Head>
-            <AuthCard>
-                {/* Session Status */}
-                <AuthSessionStatus className="mb-4" status={status} />
-
-                <form onSubmit={submitForm}>
-                    {/* Email Address */}
-                    <div>
-                        <Label htmlFor="email">Email</Label>
-
-                        <Input
-                            id="email"
-                            type="email"
-                            value={email}
-                            className="block mt-1 w-full"
-                            onChange={event => setEmail(event.target.value)}
-                            required
-                            isFocused={true}
-                        />
-
-                        <InputError messages={errors.email} className="mt-2" />
-                    </div>
-
-                    {/* Password */}
-                    <div className="mt-4">
-                        <Label htmlFor="password">Password</Label>
-
-                        <Input
-                            id="password"
-                            type="password"
-                            value={password}
-                            className="block mt-1 w-full"
-                            onChange={event => setPassword(event.target.value)}
-                            required
-                            autoComplete="current-password"
-                        />
-
-                        <InputError
-                            messages={errors.password}
-                            className="mt-2"
-                        />
-                    </div>
-
-                    {/* Remember Me */}
-                    <div className="block mt-4">
-                        <label
-                            htmlFor="remember_me"
-                            className="inline-flex items-center">
-                            <Checkbox
-                                id="remember_me"
-                                name="remember"
-                                checked={shouldRemember}
-                                onChange={event =>
-                                    setShouldRemember(event.target.checked)
-                                }
+        <div
+            className="flex min-h-screen flex-col items-center justify-center"
+            style={{ backgroundImage: 'url(/images/bg-login.jpg)' }}>
+            <div className="flex flex-col items-center w-[25em] h-fit bg-white rounded-xl bg-opacity-50 py-16 px-12">
+                <div className="flex items-center">
+                    <Image
+                        src="/icon/app-icon-white.svg"
+                        width={50}
+                        height={50}
+                        className=""
+                        alt="Picture of the author"
+                    />
+                    <Label className="font-sans text-4xl text-white flex">
+                        logoipsum{' '}
+                        <span className="text-4xl mt-[-0.50rem]">•</span>
+                    </Label>
+                </div>
+                <Label className="text-2xl font-sans mt-11 font-semibold">
+                    LOGIN
+                </Label>
+                <AuthCard>
+                    <form
+                        onSubmit={submitForm}
+                        className="flex flex-col w-full mt-5">
+                        {/* Email */}
+                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                            <Label
+                                htmlFor="email"
+                                className="text-base font-medium">
+                                Email
+                            </Label>
+                            <Input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={event => setEmail(event.target.value)}
+                                placeholder="Your email"
+                                className="rounded-xl h-14 pl-3 mt-3 text-black bg-white"
+                                required
                             />
-                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
-                                Remember me
-                            </span>
-                        </label>
-                    </div>
+                            <InputError
+                                messages={errors.email}
+                                className="mt-2"
+                            />
+                        </div>
 
-                    <div className="flex items-center justify-end mt-4">
-                        <Link
-                            href="/forgot-password"
-                            className="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800">
-                            Forgot your password?
-                        </Link>
-
-                        <PrimaryButton className="ml-4">Login</PrimaryButton>
-                    </div>
-                </form>
-            </AuthCard>
-        </GuestLayout>
+                        {/* Password */}
+                        <div className="grid w-full max-w-sm items-center gap-1.5 mt-5">
+                            <Label
+                                htmlFor="password"
+                                className="text-base font-medium">
+                                Password
+                            </Label>
+                            <Input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={event =>
+                                    setPassword(event.target.value)
+                                }
+                                placeholder="Your password"
+                                className="rounded-xl h-14 pl-3 mt-3 text-black bg-white"
+                                required
+                            />
+                            <InputError
+                                messages={errors.password}
+                                className="mt-2"
+                            />
+                        </div>
+                        <Button className="w-full h-14 rounded-xl bg-[#B568F1] hover:bg-[#6f4391] text-white text-lg mt-5">
+                            Login <ArrowRightIcon />
+                        </Button>
+                    </form>
+                </AuthCard>
+                <Label className="mt-5 flex">
+                    No have account?{' '}
+                    <Link
+                        href="/register"
+                        className="text-white font-semibold ml-1">
+                        sign up here
+                    </Link>
+                </Label>
+            </div>
+        </div>
     )
 }
 
