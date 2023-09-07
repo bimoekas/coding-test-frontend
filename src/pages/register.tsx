@@ -9,6 +9,14 @@ import { useState, FormEventHandler } from 'react'
 import Head from 'next/head'
 import PrimaryButton from '@/components/PrimaryButton'
 
+interface RegisterFormValues {
+    name?: string[]
+    email?: string[]
+    password?: string[]
+    password_confirmation?: string[]
+    length?: number
+}
+
 const Register = () => {
     const { register } = useAuth({
         middleware: 'guest',
@@ -19,7 +27,7 @@ const Register = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [passwordConfirmation, setPasswordConfirmation] = useState('')
-    const [errors, setErrors] = useState([])
+    const [errors, setErrors] = useState<RegisterFormValues>([])
 
     const submitForm: FormEventHandler = event => {
         event.preventDefault()
@@ -29,8 +37,8 @@ const Register = () => {
             email,
             password,
             password_confirmation: passwordConfirmation,
-            setErrors,
-            setStatus: () => { }
+            setErrors: newErrors => setErrors(newErrors as RegisterFormValues),
+            setStatus: () => {},
         })
     }
 
@@ -88,7 +96,10 @@ const Register = () => {
                             autoComplete="new-password"
                         />
 
-                        <InputError messages={errors.password} className="mt-2" />
+                        <InputError
+                            messages={errors.password}
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Confirm Password */}
@@ -108,7 +119,10 @@ const Register = () => {
                             required
                         />
 
-                        <InputError messages={errors.password_confirmation} className="mt-2" />
+                        <InputError
+                            messages={errors.password_confirmation}
+                            className="mt-2"
+                        />
                     </div>
 
                     <div className="flex items-center justify-end mt-4">
