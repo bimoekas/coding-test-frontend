@@ -21,6 +21,7 @@ export interface User {
     name?: string
     email?: string
     email_verified_at?: string
+    photo?: File
     must_verify_email?: boolean // this is custom attribute
     created_at?: string
     updated_at?: string
@@ -29,7 +30,11 @@ export interface User {
 export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
     const router = useRouter()
 
-    const { data: user, error, mutate } = useSWR<User>('/api/user', () =>
+    const {
+        data: user,
+        error,
+        mutate,
+    } = useSWR<User>('/api/user', () =>
         axios
             .get('/api/user')
             .then(res => res.data)
@@ -41,14 +46,22 @@ export const useAuth = ({ middleware, redirectIfAuthenticated }: IUseAuth) => {
     )
 
     const register = async (args: IApiRequest) => {
+        const formData = new FormData()
         const { setErrors, ...props } = args
+        for (const key in props) {
+            formData.append(key, props[key])
+        }
 
         await csrf()
 
         setErrors([])
 
         axios
-            .post('/register', props)
+            .post('/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
             .then(() => mutate())
             .catch(error => {
                 if (error.response.status !== 422) throw error
