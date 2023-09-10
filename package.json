@@ -41,10 +41,12 @@
     "typescript": "5.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.17",
+    "@babel/eslint-parser": "^7.22.15",
     "@next/eslint-plugin-next": "^13.2.4",
     "@tailwindcss/forms": "^0.5.3",
     "autoprefixer": "^10.4.14",
-    "eslint": "^8.36.0",
+    "eslint": "^8.49.0",
     "eslint-config-next": "13.2.4",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",

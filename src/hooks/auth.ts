@@ -2,12 +2,13 @@ import useSWR from 'swr'
 import axios, { csrf } from '@/lib/axios'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { Url } from 'url'
 
 declare type AuthMiddleware = 'auth' | 'guest'
 
 interface IUseAuth {
     middleware: AuthMiddleware
-    redirectIfAuthenticated?: string
+    redirectIfAuthenticated?: string | Url
 }
 
 interface IApiRequest {
