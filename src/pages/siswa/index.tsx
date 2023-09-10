@@ -1,168 +1,143 @@
 'use client'
 
-import React, { useState } from 'react'
-import {
-    ColumnDef,
-    ColumnFiltersState,
-    SortingState,
-    VisibilityState,
-    flexRender,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useReactTable,
-} from '@tanstack/react-table'
-import { UserPlus, ChevronDown, MoreHorizontal } from 'lucide-react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { AgGridReact } from 'ag-grid-react'
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
+import { AlertCircle, Eye, PenBox, Trash2, UserPlus, XIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
 import AdminLayout from '@/components/Layouts/AdminLayout'
+import { Students } from '@/models/students/students'
+import axios from 'axios'
 
-const data: Payment[] = [
-    {
-        id: 'm5gr84i9',
-        amount: 316,
-        status: 'success',
-        email: 'ken99@yahoo.com',
-    },
-    {
-        id: '3u1reuv4',
-        amount: 242,
-        status: 'success',
-        email: 'Abe45@gmail.com',
-    },
-    {
-        id: 'derv1ws0',
-        amount: 837,
-        status: 'processing',
-        email: 'Monserrat44@gmail.com',
-    },
-    {
-        id: '5kma53ae',
-        amount: 874,
-        status: 'success',
-        email: 'Silas22@gmail.com',
-    },
-    {
-        id: 'bhqecj4p',
-        amount: 721,
-        status: 'failed',
-        email: 'carmella@hotmail.com',
-    },
-]
+import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 
-export type Payment = {
-    id: string
-    amount: number
-    status: 'pending' | 'processing' | 'success' | 'failed'
-    email: string
+type Repo = {
+    name: string
+    stargazers_count: number
+    data: Students
 }
 
-export const columns: ColumnDef<Payment>[] = [
-    {
-        accessorKey: 'no',
-        header: 'No',
-    },
-    {
-        accessorKey: 'nis',
-        header: 'Nomor Induk Siswa',
-    },
-    {
-        accessorKey: 'nama',
-        header: 'Nama Siswa',
-    },
-    {
-        accessorKey: 'jeniskelamin',
-        header: 'Jenis Kelamin',
-    },
-    {
-        accessorKey: 'tahunmasuk',
-        header: 'Tahun Masuk',
-    },
-    {
-        accessorKey: 'alamat',
-        header: 'Alamat',
-    },
-    {
-        id: 'actions',
-        header: 'Action',
-        enableHiding: false,
-        cell: ({ row }) => {
-            const payment = row.original
+export default function Index({
+    repo,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const [rowData, setRowData] = useState(repo.data)
 
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() =>
-                                navigator.clipboard.writeText(payment.id)
-                            }>
-                            Copy payment ID
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>
-                            View payment details
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+    const columnDefs = [
+        {
+            headerName: 'No',
+            field: 'id',
+            width: 70,
+        },
+        {
+            headerName: 'Nomor Induk Siswa',
+            field: 'student_id',
+            width: 170,
+        },
+        {
+            headerName: 'Nama Siswa',
+            field: 'name',
+            width: 250,
+        },
+        {
+            headerName: 'Jenis Kelamin',
+            field: 'gender',
+            width: 130,
+        },
+        {
+            headerName: 'Tahun Masuk',
+            field: 'entry_year',
+            width: 130,
+        },
+        {
+            headerName: 'Alamat',
+            field: 'address',
+            width: 300,
+        },
+        {
+            headerName: 'Action',
+            width: 156,
+            cellRenderer: (params: Repo) => (
+                <div className="flex text-white items-center justify-center space-x-2 h-full">
+                    <Link
+                        className="w-9 h-9 bg-[#26C0F1] hover:bg-[#335762] rounded-[4px] flex items-center justify-center"
+                        href={`/siswa/${params.data.id}/show`}>
+                        <Eye />
+                    </Link>
+                    <Link
+                        className="w-9 h-9 bg-[#B568F1] hover:bg-[#7b46a2] rounded-[4px] flex items-center justify-center"
+                        href={`/siswa/${params.data.id}/edit`}>
+                        <PenBox />
+                    </Link>
+                    <AlertDialog>
+                        <AlertDialogTrigger className="w-9 h-9 bg-[#D30000] hover:bg-[#652c2c] rounded-[4px] flex items-center justify-center">
+                            <Trash2 />
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    <div className="flex flex-col items-center justify-center space-y-2">
+                                        <AlertCircle className="w-28 h-28 text-[#D30000]" />
+                                        <Label>Anda akan menghapus</Label>
+                                        <p>{params.data.name}</p>
+                                        <p>NIS {params.data.student_id}</p>
+                                    </div>
+                                </AlertDialogTitle>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex mx-auto">
+                                <AlertDialogCancel className="rounded-3xl bg-[#0CBC8B] hover:bg-[#3d816e] border-0 text-white">
+                                    <XIcon /> Batal
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                    className="rounded-3xl bg-[#D30000] hover:bg-[#6c3636] text-white"
+                                    onClick={() =>
+                                        handleDelete(params.data.id)
+                                    }>
+                                    <Trash2 />
+                                    Hapus
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            ),
+            visible: true,
+        },
+    ]
+
+    const handleDelete = async (id: any) => {
+        try {
+            await axios.delete(`http://localhost:8000/api/student/${id}`)
+            const response = await axios.get(
+                'http://localhost:8000/api/student',
             )
-        },
-    },
-]
+            setRowData(response.data.data)
+        } catch (error) {
+            console.error('Error deleting student', error)
+        }
+    }
 
-export default function Index() {
-    const [sorting, setSorting] = useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {},
-    )
-    const [rowSelection, setRowSelection] = useState({})
+    const defaultColDef = useMemo(() => {
+        return {
+            width: 170,
+            sortable: true,
+            edtable: true,
+            resizable: true,
+            filter: true,
+        }
+    }, [])
 
-    const table = useReactTable({
-        data,
-        columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        state: {
-            sorting,
-            columnFilters,
-            columnVisibility,
-            rowSelection,
-        },
-    })
     return (
         <AdminLayout
             routeLocation={
@@ -182,151 +157,31 @@ export default function Index() {
                         <Label className="text-base font-medium">
                             Data Siswa
                         </Label>
-                        <Button className="rounded-2xl bg-[#0CBC8B] text-white">
+                        <Link
+                            href="/siswa/create"
+                            className="flex rounded-2xl py-2 px-4 w-fit bg-[#0CBC8B] hover:bg-[#3f806c] text-white">
                             <UserPlus className="mr-3" />
                             Tambah Siswa
-                        </Button>
+                        </Link>
                     </div>
-                    <div className="w-full">
-                        <div className="flex items-center py-4">
-                            <Input
-                                placeholder="Filter emails..."
-                                value={
-                                    (table
-                                        .getColumn('email')
-                                        ?.getFilterValue() as string) ?? ''
-                                }
-                                onChange={event =>
-                                    table
-                                        .getColumn('email')
-                                        ?.setFilterValue(event.target.value)
-                                }
-                                className="max-w-sm"
-                            />
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        className="ml-auto">
-                                        Columns{' '}
-                                        <ChevronDown className="ml-2 h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    {table
-                                        .getAllColumns()
-                                        .filter(column => column.getCanHide())
-                                        .map(column => {
-                                            return (
-                                                <DropdownMenuCheckboxItem
-                                                    key={column.id}
-                                                    className="capitalize"
-                                                    checked={column.getIsVisible()}
-                                                    onCheckedChange={value =>
-                                                        column.toggleVisibility(
-                                                            !!value,
-                                                        )
-                                                    }>
-                                                    {column.id}
-                                                </DropdownMenuCheckboxItem>
-                                            )
-                                        })}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    {table
-                                        .getHeaderGroups()
-                                        .map(headerGroup => (
-                                            <TableRow key={headerGroup.id}>
-                                                {headerGroup.headers.map(
-                                                    header => {
-                                                        return (
-                                                            <TableHead
-                                                                key={header.id}>
-                                                                {header.isPlaceholder
-                                                                    ? null
-                                                                    : flexRender(
-                                                                          header
-                                                                              .column
-                                                                              .columnDef
-                                                                              .header,
-                                                                          header.getContext(),
-                                                                      )}
-                                                            </TableHead>
-                                                        )
-                                                    },
-                                                )}
-                                            </TableRow>
-                                        ))}
-                                </TableHeader>
-                                <TableBody>
-                                    {table.getRowModel().rows?.length ? (
-                                        table.getRowModel().rows.map(row => (
-                                            <TableRow
-                                                key={row.id}
-                                                data-state={
-                                                    row.getIsSelected() &&
-                                                    'selected'
-                                                }>
-                                                {row
-                                                    .getVisibleCells()
-                                                    .map(cell => (
-                                                        <TableCell
-                                                            key={cell.id}>
-                                                            {flexRender(
-                                                                cell.column
-                                                                    .columnDef
-                                                                    .cell,
-                                                                cell.getContext(),
-                                                            )}
-                                                        </TableCell>
-                                                    ))}
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell
-                                                colSpan={columns.length}
-                                                className="h-24 text-center">
-                                                No results.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                        <div className="flex items-center justify-end space-x-2 py-4">
-                            <div className="flex-1 text-sm text-muted-foreground">
-                                {
-                                    table.getFilteredSelectedRowModel().rows
-                                        .length
-                                }{' '}
-                                of {table.getFilteredRowModel().rows.length}{' '}
-                                row(s) selected.
-                            </div>
-                            <div className="space-x-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => table.previousPage()}
-                                    disabled={!table.getCanPreviousPage()}>
-                                    Previous
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => table.nextPage()}
-                                    disabled={!table.getCanNextPage()}>
-                                    Next
-                                </Button>
-                            </div>
-                        </div>
+                    <div className="ag-theme-alpine w-full h-[500px]">
+                        <AgGridReact
+                            rowData={rowData}
+                            defaultColDef={defaultColDef}
+                            rowHeight={50}
+                            columnDefs={columnDefs}
+                        />
                     </div>
                 </div>
             </div>
         </AdminLayout>
     )
+}
+
+export const getServerSideProps: GetServerSideProps<{
+    repo: Repo
+}> = async () => {
+    const res = await fetch('http://localhost:8000/api/student')
+    const repo = await res.json()
+    return { props: { repo } }
 }

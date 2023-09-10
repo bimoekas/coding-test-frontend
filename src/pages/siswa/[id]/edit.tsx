@@ -2,9 +2,18 @@ import AdminLayout from '@/components/Layouts/AdminLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Save } from 'lucide-react'
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { PenSquare, Save, User } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Check, ChevronsUpDown } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -22,58 +31,73 @@ import {
 } from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
-import { createStudent } from '@/hooks/students/create-student'
 import { useFormik } from 'formik'
 import { Students } from '@/models/students/students'
+import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import { updateStudent } from '@/hooks/students/update-student'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 
-export default function Create() {
+type Repo = {
+    name: string
+    stargazers_count: number
+    data: Students
+}
+
+export default function Edit({
+    repo,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+    const router = useRouter()
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
     const [photo, setPhoto] = useState(undefined)
-    const router = useRouter()
 
     const formik = useFormik<Students>({
         initialValues: {
-            student_id: '',
-            name: '',
-            address: '',
-            entry_year: '',
-            gender: '',
-            photo: undefined,
+            student_id: repo.data.student_id,
+            name: repo.data.name,
+            address: repo.data.address,
+            entry_year: repo.data.entry_year,
+            gender: repo.data.gender,
+            photo: repo.data.photo,
         },
+        enableReinitialize: true,
         onSubmit: values => {
-            let data = new FormData()
+            const data = new FormData()
             data.append('student_id', values.student_id)
             data.append('name', values.name)
             data.append('address', values.address)
             data.append('entry_year', values.entry_year)
             data.append('gender', values.gender)
-            if (values.photo) {
+            if (values.photo instanceof File) {
                 data.append('photo', values.photo)
             }
 
-            const submitedStudent: Students = {
+            const updatedStudent: Students = {
                 student_id: data.get('student_id') as string,
                 name: data.get('name') as string,
                 address: data.get('address') as string,
                 entry_year: data.get('entry_year') as string,
                 gender: data.get('gender') as string,
-                photo: data.get('photo') as File,
             }
 
-            handleSubmitStudent(submitedStudent)
+            const photo = data.get('photo') as File
+            if (photo instanceof File) {
+                updatedStudent.photo = photo
+            }
+            handleUpdateStudent(repo.data.id, updatedStudent)
         },
     })
 
-    const handleSubmitStudent = (data: Students) => {
-        axios.post('http://localhost:8000/api/student', data).then(response => {
-            if (response.status === 201) {
-                router.push('/siswa')
-                console.log(response)
-            }
-        })
+    const handleUpdateStudent = (id: number | undefined, data: Students) => {
+        axios
+            .patch(`http://localhost:8000/api/student/${id}`, data)
+            .then(response => {
+                if (response.status === 200) {
+                    router.push('/siswa')
+                    console.log(response)
+                }
+            })
     }
 
     const years = Array.from(
@@ -90,9 +114,7 @@ export default function Create() {
         }
     }
 
-    const imageUrl = photo
-        ? URL.createObjectURL(photo)
-        : '/icon/user-circle.svg'
+    const imageUrl = photo ? URL.createObjectURL(photo) : repo.data.photo
 
     return (
         <AdminLayout
@@ -110,7 +132,7 @@ export default function Create() {
                         Siswa
                     </Link>
                     <div>/</div>
-                    <div>Tambah</div>
+                    <div>Edit</div>
                 </div>
             }>
             <div className="mx-8 py-4 bg-white h-full rounded-xl">
@@ -118,7 +140,10 @@ export default function Create() {
                     <div className="flex justify-between items-center h-14">
                         <div className="flex flex-col">
                             <Label className="text-base font-medium">
-                                Tambah Data Siswa
+                                Ubah Data Siswa
+                            </Label>
+                            <Label className="text-lg font-medium mt-2">
+                                {repo.data.name}
                             </Label>
                         </div>
                         <Button
@@ -133,7 +158,7 @@ export default function Create() {
                         <div className="flex flex-col w-64 h-80 bg-[#F4F4F4] border border-[#DCDCDC] rounded-[4px] items-center justify-center">
                             <img
                                 className=" w-full h-full mb-2"
-                                src={imageUrl}
+                                src={imageUrl?.toString()}
                             />
                             <input
                                 id="photo"
@@ -153,7 +178,7 @@ export default function Create() {
                             {/* Nomor Induk Siswa */}
                             <div>
                                 <Label
-                                    htmlFor="NIS"
+                                    htmlFor="student_id"
                                     className="text-base font-medium">
                                     Nomor Induk Siswa
                                 </Label>
@@ -226,7 +251,7 @@ export default function Create() {
                                                           framework.toString() ===
                                                           value,
                                                   )
-                                                : 'Pilih'}
+                                                : formik.values.entry_year}
                                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
@@ -295,4 +320,14 @@ export default function Create() {
             </div>
         </AdminLayout>
     )
+}
+
+export const getServerSideProps: GetServerSideProps<{
+    repo: Repo
+}> = async context => {
+    const res = await fetch(
+        `http://localhost:8000/api/student/${context.query.id}`,
+    )
+    const repo = await res.json()
+    return { props: { repo } }
 }

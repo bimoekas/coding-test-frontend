@@ -42,19 +42,24 @@ export const AdminLayout = ({
             name: 'Siswa',
             href: '/siswa',
             icon: UsersIcon,
-            current: router.pathname === '/siswa',
+            current:
+                router.pathname === '/siswa' ||
+                router.pathname === '/siswa/[id]/show' ||
+                router.pathname === '/siswa/[id]/edit' ||
+                router.pathname === '/siswa/create',
         },
         {
             name: 'Pengaturan',
             href: '/pengaturan',
             icon: WrenchIcon,
-            current: router.pathname === '/pengaturan',
+            current:
+                router.pathname === '/pengaturan' ||
+                router.pathname === '/pengaturan/edit',
         },
     ]
 
     return (
         <div>
-            {/* Static sidebar for desktop */}
             <div className="hidden xl:fixed xl:inset-y-0 xl:z-50 xl:flex xl:w-72 xl:flex-col">
                 <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white  px-6 ring-1 ring-white rounded-r-2xl">
                     <div className="flex h-20 shrink-0 items-center">

@@ -13,7 +13,7 @@ import PrimaryButton from '@/components/PrimaryButton'
 const PasswordReset = () => {
     const { query } = useRouter()
 
-    const { resetPassword } = useAuth({ middleware: 'guest' })
+    const { resetPassword } = useAuth({ middleware: 'auth' })
 
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -34,7 +34,7 @@ const PasswordReset = () => {
     }
 
     useEffect(() => {
-        const email = query && query.email ? query.email as string : ''
+        const email = query && query.email ? (query.email as string) : ''
 
         setEmail(email)
     }, [query.email])
@@ -75,7 +75,10 @@ const PasswordReset = () => {
                             required
                         />
 
-                        <InputError messages={errors.password} className="mt-2" />
+                        <InputError
+                            messages={errors.password}
+                            className="mt-2"
+                        />
                     </div>
 
                     {/* Confirm Password */}
@@ -95,7 +98,10 @@ const PasswordReset = () => {
                             required
                         />
 
-                        <InputError messages={errors.password_confirmation} className="mt-2" />
+                        <InputError
+                            messages={errors.password_confirmation}
+                            className="mt-2"
+                        />
                     </div>
 
                     <div className="flex items-center justify-end mt-4">

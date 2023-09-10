@@ -13,7 +13,7 @@ interface RegisterFormValues {
     name?: string[]
     email?: string[]
     password?: string[]
-    photo?: File | null
+    photo?: File | undefined
     password_confirmation?: string[]
     length?: number
 }
@@ -201,7 +201,7 @@ const Register = () => {
                                 />
                                 <InputError
                                     messages={errors.photo}
-                                    className="mt-2"
+                                    className="mt-2 text-center"
                                 />
                             </div>
                         </div>

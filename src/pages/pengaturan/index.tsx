@@ -9,6 +9,8 @@ import AdminLayout from '@/components/Layouts/AdminLayout'
 import { useAuth } from '@/hooks/auth'
 
 export default function Index() {
+    const auth = useAuth({ middleware: 'auth' })
+    console.log(auth.user)
     return (
         <AdminLayout
             routeLocation={
@@ -30,24 +32,27 @@ export default function Index() {
                                 Profil Guru
                             </Label>
                             <Label className="text-lg font-medium mt-2">
-                                Ahmad Admin
+                                {auth.user?.name}
                             </Label>
                         </div>
-                        <Button className="rounded-2xl bg-[#B568F1] text-white hover:bg-[#804aa9]">
+                        <Link
+                            href={`/pengaturan/edit`}
+                            className="flex px-4 py-2 rounded-2xl bg-[#B568F1] text-white hover:bg-[#804aa9]">
                             <PenSquare className="mr-3" />
                             Ubah Data
-                        </Button>
+                        </Link>
                     </div>
                     <div className="flex mt-4 space-x-4">
-                        <div className="flex w-64 h-80 bg-[#F4F4F4] border border-[#DCDCDC] rounded-[4px] items-center justify-center">
-                            <User className="w-52 h-64 text-[#B568F1]" />
-                        </div>
+                        <img
+                            src={auth.user?.photo?.toString()}
+                            className="flex w-64 h-80 bg-[#F4F4F4] object-fit border border-[#DCDCDC] rounded-[4px] items-center justify-center"
+                        />
                         <div className="flex flex-col">
                             <Label className="text-base font-medium text-[#333333] opacity-50">
                                 Email
                             </Label>
                             <Label className="text-lg font-medium mt-2">
-                                ahmad@bukanadmin.po
+                                {auth.user?.email}
                             </Label>
                         </div>
                     </div>

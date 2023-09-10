@@ -1,12 +1,11 @@
-import AppLayout from '@/components/Layouts/AppLayout'
-import Head from 'next/head'
 import AdminLayout from '@/components/Layouts/AdminLayout'
-import { BellIcon, UserIcon } from 'lucide-react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { BookOpen, BookOpenCheck, School2, UserIcon } from 'lucide-react'
 import { Label } from '@/components/ui/label'
-import Link from 'next/link'
+import { useListStudents } from '@/hooks/students/list-student'
 
 const Dashboard = () => {
+    const { data } = useListStudents()
+    console.log(data)
     return (
         <AdminLayout
             routeLocation={
@@ -34,7 +33,7 @@ const Dashboard = () => {
                     <div className="bg-[#D95F18]/20 bg-opacity-20 rounded-[10px] h-full">
                         <div className="flex items-center justify-between h-full mx-8">
                             <div className="flex flex-col justify-center items-center w-14 h-14 bg-[#F16A1B]/50 rounded-xl">
-                                <UserIcon />
+                                <School2 />
                             </div>
                             <div className="text-right">
                                 <Label className="font-medium text-2xl">
@@ -49,7 +48,7 @@ const Dashboard = () => {
                     <div className="bg-[#AD2D1E]/20 bg-opacity-20 rounded-[10px] h-full">
                         <div className="flex items-center justify-between h-full mx-8">
                             <div className="flex flex-col justify-center items-center w-14 h-14 bg-[#C03221]/50 rounded-xl">
-                                <UserIcon />
+                                <BookOpen />
                             </div>
                             <div className="text-right">
                                 <Label className="font-medium text-2xl">
@@ -64,7 +63,7 @@ const Dashboard = () => {
                     <div className="bg-[#344ED1]/20 bg-opacity-20 rounded-[10px] h-full">
                         <div className="flex items-center justify-between h-full mx-8">
                             <div className="flex flex-col justify-center items-center w-14 h-14 bg-[#3A57E8]/50 rounded-xl">
-                                <UserIcon />
+                                <BookOpenCheck />
                             </div>
                             <div className="text-right">
                                 <Label className="font-medium text-2xl">
